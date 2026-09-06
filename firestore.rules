@@ -1,0 +1,76 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions for security validation
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Strict User-Isolated Data Partitioning: users/{userId}/journals/{journalId}
+    match /users/{userId}/journals/{journalId} {
+      // Direct document reads & deletes require exact authenticated user ownership
+      allow get, delete: if isOwner(userId) && isValidId(journalId);
+
+      // List queries are constrained strictly to the authenticated owner's subpath
+      allow list: if isOwner(userId);
+
+      // Creation requires valid payload, matching owner UID, and size bounds
+      allow create: if isOwner(userId)
+        && isValidId(journalId)
+        && incoming().userId == userId
+        && incoming().id == journalId
+        && incoming().title is string
+        && incoming().title.size() <= 200;
+
+      // Updates cannot alter the owner or document ID
+      allow update: if isOwner(userId)
+        && isValidId(journalId)
+        && incoming().userId == existing().userId
+        && incoming().id == existing().id;
+
+      // Messages subcollection: users/{userId}/journals/{journalId}/messages/{messageId}
+      match /messages/{messageId} {
+        allow get, delete: if isOwner(userId) && isValidId(journalId) && isValidId(messageId);
+        allow list: if isOwner(userId) && isValidId(journalId);
+
+        allow create: if isOwner(userId)
+          && isValidId(journalId)
+          && isValidId(messageId)
+          && incoming().userId == userId
+          && incoming().journalId == journalId
+          && (incoming().role == 'user' || incoming().role == 'model')
+          && incoming().content is string
+          && incoming().content.size() <= 10000;
+
+        allow update: if isOwner(userId)
+          && isValidId(journalId)
+          && isValidId(messageId)
+          && incoming().userId == existing().userId
+          && incoming().journalId == existing().journalId;
+      }
+    }
+  }
+}

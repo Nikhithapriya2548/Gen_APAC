@@ -1,0 +1,6 @@
+{
+  "name": "Personal Gemini Journal",
+  "description": "A secure, multi-turn AI journaling application with user-isolated Firestore persistence, Gemini 3.6 Flash reflection analysis, and personal growth timeline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

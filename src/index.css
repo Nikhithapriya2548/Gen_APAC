@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* Ambient Dot Grid Pattern */
+  .bg-grid-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /* Glass Surface with luminous edge */
+  .glass-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(6, 9, 17, 0.85) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-card-hover {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass-card-hover:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 0 35px -8px rgba(56, 189, 248, 0.18), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Dynamic light beam sweep */
+  .light-sweep-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .light-sweep-container::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.03),
+      rgba(56, 189, 248, 0.15),
+      rgba(255, 255, 255, 0.03),
+      transparent
+    );
+    transform: rotate(25deg);
+    animation: lightSweep 6s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  /* Luminous Button Glow */
+  .btn-luminous {
+    position: relative;
+    background: #ffffff;
+    color: #090d16;
+    transition: all 0.25s ease;
+  }
+  .btn-luminous::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(90deg, #38bdf8, #818cf8, #34d399, #38bdf8);
+    background-size: 300% 100%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: borderGradient 4s linear infinite;
+  }
+  .btn-luminous:hover::before {
+    opacity: 0.75;
+    filter: blur(6px);
+  }
+}
+
+@keyframes lightSweep {
+  0% {
+    left: -70%;
+  }
+  40%, 100% {
+    left: 170%;
+  }
+}
+
+@keyframes borderGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes ambientPulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+}
+
+.animate-ambient-pulse {
+  animation: ambientPulse 8s ease-in-out infinite;
+}
